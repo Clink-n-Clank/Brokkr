@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// RunWithRetry of function with  time
+// RunWithRetry of function with time
 func RunWithRetry(attempts uint, backoff time.Duration, exec func() error) (execErr error) {
 	for i := uint(0); i < attempts; i++ {
 		if execErr = exec(); execErr == nil {
