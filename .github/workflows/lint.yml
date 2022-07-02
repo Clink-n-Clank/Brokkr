@@ -17,8 +17,6 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v4
         env:
-          # Lint only changed files
-          VALIDATE_ALL_CODEBASE: false
           VALIDATE_GO: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
