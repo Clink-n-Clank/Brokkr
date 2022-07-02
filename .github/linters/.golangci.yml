@@ -1,23 +1,38 @@
 ---
+run:
+  go: "1.17"
+  tests: false
+  modules-download-mode: vendor
+  timeout: 5m
+
 issues:
   exclude-rules:
-    - path: _test\.go
-      linters:
-        - dupl
-        - gosec
-        - goconst
+    - path: vendor
+
 linters:
-  disable:
-    - typecheck
   enable:
     - gosec
-    - unconvert
     - gocyclo
     - goconst
     - goimports
     - gocritic
     - govet
+    - unconvert
     - revive
+    - dupl
+    - stylecheck
+    - misspell
+    - bodyclose
+    - contextcheck
+    - errcheck
+    - gosimple
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - varcheck
+    - cyclop
+
 linters-settings:
   errcheck:
     check-blank: true
@@ -25,5 +40,3 @@ linters-settings:
     check-shadowing: true
   gocyclo:
     min-complexity: 15
-  maligned:
-    suggest-new: true
