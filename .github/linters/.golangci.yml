@@ -1,4 +1,11 @@
 ---
+run:
+  timeout: 5m
+  go: '1.17'
+  tests: false
+  allow-parallel-runners: true
+  modules-download-mode: vendor
+
 issues:
   exclude-rules:
     - path: _test\.go
