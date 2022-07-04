@@ -1,5 +1,5 @@
 # Brokkr
-![Coverage](https://img.shields.io/badge/Coverage-82.3%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-83.5%25-brightgreen)
 ![GitHub Super-Linter](https://github.com/Clink-n-Clank/Brokkr/actions/workflows/lint.yml/badge.svg)
 
 Brokkr micro framework that helps you quickly write simple API's
