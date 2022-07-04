@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/Clink-n-Clank/Brokkr/component/background"
 )
@@ -23,6 +25,8 @@ type (
 
 		listener    net.Listener
 		listenerErr error
+
+		health *health.Server
 	}
 
 	// Options sets options such as credentials, keepalive parameters, etc.
@@ -77,6 +81,7 @@ func NewServer(opts ...Options) *BackgroundServer {
 		network: netProtocol,
 		address: netAddress,
 		timeout: 30 * time.Second,
+		health:  health.NewServer(),
 	}
 
 	// Load additional grpc server options
@@ -84,8 +89,12 @@ func NewServer(opts ...Options) *BackgroundServer {
 		o(serv)
 	}
 
+	// Create and run gRPC server
 	serv.Server = grpc.NewServer(serv.opts...)
 	serv.listenerErr = serv.listen()
+
+	// Add internal sub-services to gRPC server register
+	grpc_health_v1.RegisterHealthServer(serv.Server, serv.health)
 
 	return serv
 }
@@ -106,16 +115,15 @@ func (s *BackgroundServer) OnStart(_ context.Context) error {
 		return s.listenerErr
 	}
 
-	// TODO Add logger as dependency -> BackgroundServer start
+	s.health.Resume()
 
 	return s.Serve(s.listener)
 }
 
 // OnStop event to be called when main loop will be started
 func (s *BackgroundServer) OnStop(_ context.Context) error {
+	s.health.Shutdown()
 	s.GracefulStop()
-
-	// TODO Add logger as dependency -> BackgroundServer stop
 
 	return nil
 }
