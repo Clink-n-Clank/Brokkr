@@ -2,11 +2,12 @@ package metrics
 
 import (
 	"fmt"
-	"github.com/cucumber/godog/colors"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cucumber/godog/colors"
 )
 
 // Collector contains collected statistic while API server works
@@ -27,8 +28,8 @@ type RequestState struct {
 	URL       string
 	Method    string
 	Succeeded uint32
-	Failed    uint32
-	Trip      RoundTrip
+	Failed uint32
+	Trip   RoundTrip
 }
 
 // RoundTrip of request to response
