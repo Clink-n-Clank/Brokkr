@@ -21,26 +21,27 @@ type Scenario struct {
 	StepFunc interface{}
 }
 
-type bddTester struct {
+// Tester has methods for adding scenarios and running tests
+type Tester struct {
 	name string
 	scenarios []Scenario
 }
 
 // NewBDDTester returns a new bdd tester where you can add test scenarios and run them
-func NewBDDTester(name string) *bddTester {
-	return &bddTester{
+func NewBDDTester(name string) *Tester {
+	return &Tester{
 		name:            name,
 		scenarios: []Scenario{},
 	}
 }
 
 // AddScenario adds a new scenario
-func (t *bddTester) AddScenario(s Scenario) {
+func (t *Tester) AddScenario(s Scenario) {
 	t.scenarios = append(t.scenarios, s)
 }
 
 // RunTests will run the tests and match them to the given scenarios
-func (t *bddTester) RunTests() int {
+func (t *Tester) RunTests() int {
 	pflag.Parse()
 	opts.Paths = pflag.Args()
 
@@ -53,7 +54,7 @@ func (t *bddTester) RunTests() int {
 	return status
 }
 
-func (t *bddTester) initializeScenario(ctx *godog.ScenarioContext) {
+func (t *Tester) initializeScenario(ctx *godog.ScenarioContext) {
 	for _, scenario := range t.scenarios {
 		ctx.Step(scenario.Expr, scenario.StepFunc)
 	}
