@@ -29,3 +29,6 @@ jobs:
         run: go build -v ./...
       - name: Test
         run: go test -v ./...
+      - name: BDD integration test
+        run: go test --godog.format=pretty --godog.tags=@~exception general
+        working-directory: component/test/bdd/integration_tests
