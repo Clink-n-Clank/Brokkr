@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/cucumber/godog v0.12.5
 	github.com/google/uuid v1.3.0
+	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
@@ -21,7 +22,6 @@ require (
 	github.com/hashicorp/go-memdb v1.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect

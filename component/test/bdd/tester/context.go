@@ -2,7 +2,6 @@ package tester
 
 import (
 	"fmt"
-	"github.com/Clink-n-Clank/Brokkr/component/test/bdd/tester/metrics"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +9,8 @@ import (
 	"path"
 	"sync"
 	"time"
+
+	"github.com/Clink-n-Clank/Brokkr/component/test/bdd/tester/metrics"
 )
 
 // ActorAPI container context
