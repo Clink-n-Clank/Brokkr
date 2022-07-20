@@ -55,11 +55,13 @@ func NewActorAPI() *ActorAPI {
 	}
 }
 
-func (a *ActorAPI) saveToMemory(key, value string) {
+// SaveToMemory key and value in ActorAPI
+func (a *ActorAPI) SaveToMemory(key, value string) {
 	a.Storage[key] = value
 }
 
-func (a *ActorAPI) handleRequest(method, endpointPath string, payload io.Reader) (failedReason error) {
+// HandleHTTPRequest ...
+func (a *ActorAPI) HandleHTTPRequest(method, endpointPath string, payload io.Reader) (failedReason error) {
 	var wg sync.WaitGroup
 
 	for i := uint32(0); i < a.StressConcurrentRequests; i++ {
