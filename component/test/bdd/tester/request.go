@@ -88,7 +88,7 @@ func (a *ActorAPI) ISendPreBuiltRequestWithStoredPathAndPayload(method, endpoint
 	return a.handleRequest(method, endpoint, strings.NewReader(a.Payload))
 }
 
-func (a *ActorAPI) UseRequestParams(dt *godog.Table) error {
+func (a *ActorAPI) AddQueryRequestParams(dt *godog.Table) error {
 	headerRowIndex := 0
 
 	for valueRowIndex := 1; valueRowIndex < len(dt.Rows); valueRowIndex++ {
@@ -100,7 +100,7 @@ func (a *ActorAPI) UseRequestParams(dt *godog.Table) error {
 	return nil
 }
 
-func (a *ActorAPI) CreateRequestParamsFromKey(param, key string) error {
+func (a *ActorAPI) AddQueryRequestParamFromStoredKey(param, key string) error {
 	if _, ok := a.Storage[key]; !ok {
 		return fmt.Errorf("key %s was not found in memory to use in payload", key)
 	}
@@ -109,7 +109,7 @@ func (a *ActorAPI) CreateRequestParamsFromKey(param, key string) error {
 	return nil
 }
 
-func (a *ActorAPI) CreateRequestParamsWithValue(param, value string) error {
+func (a *ActorAPI) AddQueryRequestParamWithValue(param, value string) error {
 	a.HTTPQuery[param] = value
 
 	return nil

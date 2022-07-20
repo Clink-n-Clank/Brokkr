@@ -15,10 +15,14 @@ func TestMain(m *testing.M) {
 		Expr:     `^This test will pass$`,
 		StepFunc: testIsPassing,
 	})
-
 	bddTester.AddScenario(bdd.Scenario{
 		Expr:     `^This test will fail`,
 		StepFunc: testIsFailing,
+	})
+	// Replace action
+	bddTester.AddScenario(bdd.Scenario{
+		Expr:     `^I set header "([^"]*)" with value "([^"]*)"$`,
+		StepFunc: testReplacedHttpQueryAction,
 	})
 
 	status := bddTester.RunTests()
@@ -26,7 +30,19 @@ func TestMain(m *testing.M) {
 		status = st
 	}
 
+	v, found := bdd.ActorContext.HTTPQuery["Unit"]
+	if !found || v != "Test" {
+		fmt.Printf("Expected that scenario action will be replaced (testReplacedHttpQueryAction)\n")
+		os.Exit(1)
+	}
+
 	os.Exit(status)
+}
+
+func testReplacedHttpQueryAction(k, v string) error {
+	bdd.ActorContext.HTTPQuery[k] = v
+
+	return nil
 }
 
 func testIsPassing() error {
