@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	opts         = godog.Options{}
-	actorContext *tester.ActorAPI
+	opts = godog.Options{}
+
+	ActorContext *tester.ActorAPI
 )
 
 func init() {
@@ -17,27 +18,43 @@ func init() {
 
 // Scenario contains an expression and a step function that it triggers
 type Scenario struct {
-	Expr interface{}
+	Expr     interface{}
 	StepFunc interface{}
 }
 
 // Tester has methods for adding scenarios and running tests
 type Tester struct {
-	name string
+	name      string
 	scenarios []Scenario
 }
 
 // NewBDDTester returns a new bdd tester where you can add test scenarios and run them
 func NewBDDTester(name string) *Tester {
-	return &Tester{
-		name:            name,
+	t := &Tester{
+		name:      name,
 		scenarios: []Scenario{},
 	}
+
+	ActorContext = tester.NewActorAPI()
+	preloadScenarioActions(t, ActorContext)
+
+	return t
 }
 
 // AddScenario adds a new scenario
 func (t *Tester) AddScenario(s Scenario) {
-	t.scenarios = append(t.scenarios, s)
+	isRelacedDefault := false
+	for i, old := range t.scenarios {
+		if old.Expr == s.Expr {
+			t.scenarios[i] = s
+			isRelacedDefault = true
+			break
+		}
+	}
+
+	if !isRelacedDefault {
+		t.scenarios = append(t.scenarios, s)
+	}
 }
 
 // RunTests will run the tests and match them to the given scenarios
