@@ -43,7 +43,7 @@ func (a *ActorAPI) ISetHeaderWithValue(name string, value string) error {
 }
 
 func (a *ActorAPI) ISendSimpleRequestTo(method, endpoint string) error {
-	return a.handleRequest(method, endpoint, nil)
+	return a.HandleHTTPRequest(method, endpoint, nil)
 }
 
 func (a *ActorAPI) ISendRequestWithPayload(method, endpoint string, payloadFile string) error {
@@ -52,7 +52,7 @@ func (a *ActorAPI) ISendRequestWithPayload(method, endpoint string, payloadFile 
 		return payloadErr
 	}
 
-	return a.handleRequest(method, endpoint, strings.NewReader(string(payload)))
+	return a.HandleHTTPRequest(method, endpoint, strings.NewReader(string(payload)))
 }
 
 func (a *ActorAPI) IAddURLPath(path string) error {
@@ -72,7 +72,7 @@ func (a *ActorAPI) IAddURLPathByStoredKey(key string) error {
 }
 
 func (a *ActorAPI) ISendPreBuiltRequestWithPath(method, endpoint string) error {
-	return a.handleRequest(method, endpoint, nil)
+	return a.HandleHTTPRequest(method, endpoint, nil)
 }
 
 func (a *ActorAPI) ISendPreBuiltRequestWithPathAndPayload(method, endpoint, payloadFile string) error {
@@ -81,11 +81,11 @@ func (a *ActorAPI) ISendPreBuiltRequestWithPathAndPayload(method, endpoint, payl
 		return payloadErr
 	}
 
-	return a.handleRequest(method, endpoint, strings.NewReader(string(payload)))
+	return a.HandleHTTPRequest(method, endpoint, strings.NewReader(string(payload)))
 }
 
 func (a *ActorAPI) ISendPreBuiltRequestWithStoredPathAndPayload(method, endpoint string) error {
-	return a.handleRequest(method, endpoint, strings.NewReader(a.Payload))
+	return a.HandleHTTPRequest(method, endpoint, strings.NewReader(a.Payload))
 }
 
 func (a *ActorAPI) AddQueryRequestParams(dt *godog.Table) error {
