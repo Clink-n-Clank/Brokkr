@@ -1,30 +1,16 @@
----
 run:
   timeout: 5m
   go: '1.17'
   tests: false
-  allow-parallel-runners: true
   modules-download-mode: vendor
+  skip-dirs-use-default: true
+  skip-dirs:
+    - generated
+    - vendor
 
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - dupl
-        - gosec
-        - goconst
-linters:
-  disable:
-    - typecheck
-  enable:
-    - gosec
-    - unconvert
-    - gocyclo
-    - goconst
-    - goimports
-    - gocritic
-    - govet
-    - revive
+output:
+  sort-results: true
+
 linters-settings:
   errcheck:
     check-blank: true
@@ -34,3 +20,6 @@ linters-settings:
     min-complexity: 15
   maligned:
     suggest-new: true
+
+linters:
+  fast: true
