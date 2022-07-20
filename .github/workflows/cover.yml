@@ -24,9 +24,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Run Test
+      - name: Run Unit Test
         run: |
-          go test -v ./... -covermode=count -coverprofile=coverage.out
+          go test -v --race $(go list ./... | (grep -v /vendor/) | (grep -v internal/test/bdd/integration_tests)) -covermode=atomic -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
       - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
