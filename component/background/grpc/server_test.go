@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 func TestServer(t *testing.T) {
@@ -74,4 +75,27 @@ func TestAddress(t *testing.T) {
 	if !reflect.DeepEqual(v, s.address) {
 		t.Errorf("expect %s, got %s", v, s.address)
 	}
+}
+
+func TestSetServicesChecks(t *testing.T) {
+	const testingDependedService = "unit"
+	opts := []Options{
+		SetServicesChecks(map[string]func() grpc_health_v1.HealthCheckResponse_ServingStatus{
+			testingDependedService: func() grpc_health_v1.HealthCheckResponse_ServingStatus {
+				return grpc_health_v1.HealthCheckResponse_SERVING
+			},
+		}),
+	}
+
+	s := NewServer(opts...)
+
+	s.health.Resume()
+	r, rErr := s.health.Check(context.Background(), &grpc_health_v1.HealthCheckRequest{Service: testingDependedService})
+	assert.NoError(t, rErr)
+	assert.Equal(t, r.GetStatus(), grpc_health_v1.HealthCheckResponse_SERVING)
+
+	s.health.Shutdown()
+	r, rErr = s.health.Check(context.Background(), &grpc_health_v1.HealthCheckRequest{Service: testingDependedService})
+	assert.NoError(t, rErr)
+	assert.Equal(t, r.GetStatus(), grpc_health_v1.HealthCheckResponse_NOT_SERVING)
 }
