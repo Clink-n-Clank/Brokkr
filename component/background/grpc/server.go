@@ -27,6 +27,9 @@ type (
 		listenerErr error
 
 		health *health.Server
+
+		// dependedServicesCheck has as string - service name and function that returns state
+		dependedServicesCheck map[string]func() grpc_health_v1.HealthCheckResponse_ServingStatus
 	}
 
 	// Options sets options such as credentials, keepalive parameters, etc.
@@ -67,6 +70,13 @@ func SetTimeout(t time.Duration) Options {
 	}
 }
 
+// SetServicesChecks to verify if gRPC working correctly
+func SetServicesChecks(srv map[string]func() grpc_health_v1.HealthCheckResponse_ServingStatus) Options {
+	return func(s *BackgroundServer) {
+		s.dependedServicesCheck = srv
+	}
+}
+
 // AddOptions for gRPC server
 func AddOptions(opts ...grpc.ServerOption) Options {
 	return func(s *BackgroundServer) {
@@ -94,6 +104,10 @@ func NewServer(opts ...Options) *BackgroundServer {
 	serv.listenerErr = serv.listen()
 
 	// Add internal sub-services to gRPC server register
+	for serviceName, check := range serv.dependedServicesCheck {
+		serv.health.SetServingStatus(serviceName, check())
+	}
+
 	grpc_health_v1.RegisterHealthServer(serv.Server, serv.health)
 
 	return serv
