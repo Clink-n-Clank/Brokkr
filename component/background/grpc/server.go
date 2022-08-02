@@ -137,7 +137,8 @@ func (s *BackgroundServer) unaryServerInterceptorForMiddleware() grpc.UnaryServe
 			return handler(ctx, req)
 		}
 
-		if affectedMiddlewares := s.middlewareComposer.Search(info.FullMethod); len(affectedMiddlewares) > 0 {
+		affectedMiddlewares := s.middlewareComposer.Search(info.FullMethod)
+		if len(affectedMiddlewares) > 0 {
 			defaultRequestHandler = s.middlewareComposer.PassToNext(affectedMiddlewares...)(defaultRequestHandler)
 		}
 

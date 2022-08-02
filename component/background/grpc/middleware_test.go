@@ -38,20 +38,6 @@ func TestOrderMiddlewares(t *testing.T) {
 	assert.Len(t, affectedMiddlewares, 2)
 }
 
-func TestCheckIfAppendedByPathMiddlewares(t *testing.T) {
-	// This case must append middleware by:
-	// /* - each time
-	// /route/* - all what is after "route"
-	mc := NewMiddlewareComposer()
-	mc.Register("*", testingPermanentMiddleware)
-	mc.Register("route/*", testingFilteredMiddleware)
-	mc.Register("*", testingThisWillLogEachRequestMiddleware(t))
-
-	affectedMiddlewares := mc.Search("route/B")
-	assert.NotEmpty(t, affectedMiddlewares)
-	assert.Len(t, affectedMiddlewares, 3)
-}
-
 func TestPassToNext(t *testing.T) {
 	testingPassToMiddleware = 0
 
@@ -74,6 +60,19 @@ func TestPassToNext(t *testing.T) {
 	}
 }
 
+func TestCheckIfAppendedByPathMiddlewares(t *testing.T) {
+	// This case must append middleware by:
+	// /* - each time
+	// /api.route/* - all what is after "route"
+	mc := NewMiddlewareComposer()
+	mc.Register("*", testingPermanentMiddleware)
+	mc.Register("/api.route/*", testingFilteredMiddleware, testingThisWillLogEachRequestMiddleware(t))
+
+	affectedMiddlewares := mc.Search("/api.route/methods/FooBar")
+	assert.NotEmpty(t, affectedMiddlewares)
+	assert.Len(t, affectedMiddlewares, 3)
+}
+
 func testingFilteredMiddleware(handler RequestHandler) RequestHandler {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		testingPassToMiddleware++
@@ -91,7 +90,7 @@ func testingPermanentMiddleware(handler RequestHandler) RequestHandler {
 func testingThisWillLogEachRequestMiddleware(t *testing.T) Middleware {
 	return func(handler RequestHandler) RequestHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			t.Logf("testingThisWillLogEachRequestMiddleware -> req:%v", req)
+			t.Logf("testingThisWillLogEachRequestMiddleware -> req:%v\n", req)
 			return handler(ctx, req)
 		}
 	}

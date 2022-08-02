@@ -8,6 +8,11 @@ import (
 
 // Abstract middleware functionality based on chain of responsibility
 
+const (
+	// globalMiddlewareFilterEmpty will be used if we have middlewares like * (always for all routes)
+	globalMiddlewareFilterEmpty = ""
+)
+
 // RequestHandler will be invoked in the gRPC Middleware
 type RequestHandler func(ctx context.Context, req interface{}) (interface{}, error)
 
@@ -32,7 +37,7 @@ func NewMiddlewareComposer() *MiddlewareComposer {
 
 // Register middleware with filter
 func (mc *MiddlewareComposer) Register(filter string, mw ...Middleware) {
-	if filter == "" {
+	if filter == globalMiddlewareFilterEmpty {
 		filter = "*"
 	}
 
@@ -41,7 +46,7 @@ func (mc *MiddlewareComposer) Register(filter string, mw ...Middleware) {
 		mc.routesUnderFilter = append(mc.routesUnderFilter, filter)
 
 		sort.Slice(mc.routesUnderFilter, func(f1, f2 int) bool {
-			return mc.routesUnderFilter[f1] < mc.routesUnderFilter[f2]
+			return mc.routesUnderFilter[f1] > mc.routesUnderFilter[f2]
 		})
 	}
 
@@ -50,17 +55,27 @@ func (mc *MiddlewareComposer) Register(filter string, mw ...Middleware) {
 
 // Search middleware that related to filtered request
 func (mc *MiddlewareComposer) Search(requestPath string) []Middleware {
-	lookupChain := map[string][]Middleware{}
-
-	for _, filtered := range mc.routesUnderFilter {
-		if strings.HasPrefix(requestPath, filtered) {
-			lookupChain[filtered] = mc.routes[filtered]
-		}
+	ms := make([]Middleware, 0)
+	if globalMiddlewares, exist := mc.routes[globalMiddlewareFilterEmpty]; exist {
+		ms = append(ms, globalMiddlewares...)
 	}
 
-	ms := make([]Middleware, 0)
-	for _, m := range lookupChain {
-		ms = append(ms, m...)
+	if requestPath == globalMiddlewareFilterEmpty {
+		return ms
+	}
+
+	if neededMiddleware, ok := mc.routes[requestPath]; ok {
+		return append(ms, neededMiddleware...)
+	}
+
+	for _, filtered := range mc.routesUnderFilter {
+		if filtered == globalMiddlewareFilterEmpty { // Included by default
+			continue
+		}
+
+		if strings.HasPrefix(requestPath, filtered) {
+			return append(ms, mc.routes[filtered]...)
+		}
 	}
 
 	return ms
@@ -68,11 +83,11 @@ func (mc *MiddlewareComposer) Search(requestPath string) []Middleware {
 
 // PassToNext delegate to next middleware to execute
 func (mc *MiddlewareComposer) PassToNext(m ...Middleware) Middleware {
-	return func(next RequestHandler) RequestHandler {
+	return func(requestHandler RequestHandler) RequestHandler {
 		for i := len(m) - 1; i >= 0; i-- {
-			next = m[i](next)
+			requestHandler = m[i](requestHandler)
 		}
 
-		return next
+		return requestHandler
 	}
 }
