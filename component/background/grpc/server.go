@@ -12,29 +12,25 @@ import (
 	"github.com/Clink-n-Clank/Brokkr/component/background"
 )
 
-type (
-	// BackgroundServer wrapper
-	BackgroundServer struct {
-		*grpc.Server
+// BackgroundServer wrapper
+type BackgroundServer struct {
+	*grpc.Server
+	opts               []grpc.ServerOption
+	unaryInterceptors  []grpc.UnaryServerInterceptor
+	streamInterceptors []grpc.StreamServerInterceptor
+	health             *health.Server
+	middlewareComposer *MiddlewareComposer
 
-		opts []grpc.ServerOption
+	network string
+	address string
+	timeout time.Duration
 
-		network string
-		address string
-		timeout time.Duration
+	listener    net.Listener
+	listenerErr error
 
-		listener    net.Listener
-		listenerErr error
-
-		health *health.Server
-
-		// dependedServicesCheck has as string - service name and function that returns state
-		dependedServicesCheck map[string]func() grpc_health_v1.HealthCheckResponse_ServingStatus
-	}
-
-	// Options sets options such as credentials, keepalive parameters, etc.
-	Options func(o *BackgroundServer)
-)
+	// dependedServicesCheck has as string - service name and function that returns state
+	dependedServicesCheck map[string]func() grpc_health_v1.HealthCheckResponse_ServingStatus
+}
 
 const (
 	processName = "gRPC Server"
@@ -42,62 +38,36 @@ const (
 	netAddress  = ":0"
 )
 
-// SetNetwork custom value
-func SetNetwork(n string) Options {
-	return func(s *BackgroundServer) {
-		s.network = n
-	}
-}
-
-// SetListener custom value
-func SetListener(l net.Listener) Options {
-	return func(s *BackgroundServer) {
-		s.listener = l
-	}
-}
-
-// SetAddress  custom value
-func SetAddress(a string) Options {
-	return func(s *BackgroundServer) {
-		s.address = a
-	}
-}
-
-// SetTimeout custom value
-func SetTimeout(t time.Duration) Options {
-	return func(s *BackgroundServer) {
-		s.timeout = t
-	}
-}
-
-// SetServicesChecks to verify if gRPC working correctly
-func SetServicesChecks(srv map[string]func() grpc_health_v1.HealthCheckResponse_ServingStatus) Options {
-	return func(s *BackgroundServer) {
-		s.dependedServicesCheck = srv
-	}
-}
-
-// AddOptions for gRPC server
-func AddOptions(opts ...grpc.ServerOption) Options {
-	return func(s *BackgroundServer) {
-		s.opts = opts
-	}
-}
-
 // NewServer instance
-func NewServer(opts ...Options) *BackgroundServer {
+func NewServer(builder *ServerOptionsBuilder) *BackgroundServer {
 	// Set defaults for new process wrapper
 	serv := &BackgroundServer{
-		network: netProtocol,
-		address: netAddress,
-		timeout: 30 * time.Second,
-		health:  health.NewServer(),
+		network:            netProtocol,
+		address:            netAddress,
+		timeout:            30 * time.Second,
+		health:             health.NewServer(),
+		middlewareComposer: NewMiddlewareComposer(),
 	}
 
 	// Load additional grpc server options
-	for _, o := range opts {
+	for _, o := range builder.Build() {
 		o(serv)
 	}
+
+	// TODO add stream middleware support
+	// Load middlewares and interceptors
+	serverUnaryInterceptor := []grpc.UnaryServerInterceptor{serv.unaryServerInterceptorForMiddleware()}
+	if len(serv.unaryInterceptors) > 0 {
+		serverUnaryInterceptor = append(serverUnaryInterceptor, serv.unaryInterceptors...)
+	}
+
+	serv.opts = append(
+		serv.opts,
+		[]grpc.ServerOption{
+			grpc.ChainUnaryInterceptor(serverUnaryInterceptor...),
+			grpc.ChainStreamInterceptor(serv.streamInterceptors...),
+		}...,
+	)
 
 	// Create and run gRPC server
 	serv.Server = grpc.NewServer(serv.opts...)
@@ -156,3 +126,23 @@ func (s *BackgroundServer) listen() error {
 
 	return nil
 }
+
+// unaryServerInterceptorForMiddleware managing gRPC request interception to delegate it to Middleware
+func (s *BackgroundServer) unaryServerInterceptorForMiddleware() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		//
+		// Look up for registered middlewares
+		//
+		defaultRequestHandler := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return handler(ctx, req)
+		}
+
+		if affectedMiddlewares := s.middlewareComposer.Search(info.FullMethod); len(affectedMiddlewares) > 0 {
+			defaultRequestHandler = s.middlewareComposer.PassToNext(affectedMiddlewares...)(defaultRequestHandler)
+		}
+
+		return defaultRequestHandler(ctx, req)
+	}
+}
+
+// TODO add stream middleware support
