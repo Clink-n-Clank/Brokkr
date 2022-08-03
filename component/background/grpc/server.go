@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/Clink-n-Clank/Brokkr/component/background"
 )
@@ -130,6 +131,13 @@ func (s *BackgroundServer) listen() error {
 // unaryServerInterceptorForMiddleware managing gRPC request interception to delegate it to Middleware
 func (s *BackgroundServer) unaryServerInterceptorForMiddleware() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		extCtxMeta := RequestContextMetadata{FullMethod: info.FullMethod}
+		if meta, metaNotExist := metadata.FromIncomingContext(ctx); !metaNotExist {
+			extCtxMeta.Meta = meta
+		}
+
+		ctx = s.middlewareComposer.ExtendContext(ctx, extCtxMeta)
+
 		//
 		// Look up for registered middlewares
 		//
