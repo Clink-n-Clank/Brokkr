@@ -4,6 +4,8 @@ import (
 	"context"
 	"sort"
 	"strings"
+
+	"google.golang.org/grpc/metadata"
 )
 
 // Abstract middleware functionality based on chain of responsibility
@@ -13,18 +15,25 @@ const (
 	globalMiddlewareFilterEmpty = ""
 )
 
-// RequestHandler will be invoked in the gRPC Middleware
-type RequestHandler func(ctx context.Context, req interface{}) (interface{}, error)
+type (
+	// RequestHandler will be invoked in the gRPC Middleware
+	RequestHandler func(ctx context.Context, req interface{}) (interface{}, error)
+	// Middleware to do some actions between gRPC requests
+	Middleware func(RequestHandler) RequestHandler
 
-// Middleware to do some actions between gRPC requests
-type Middleware func(RequestHandler) RequestHandler
-
-// MiddlewareComposer keeps middlewares and keeps it sorted by filter
-type MiddlewareComposer struct {
-	mws               []Middleware
-	routesUnderFilter []string
-	routes            map[string][]Middleware
-}
+	// MiddlewareComposer keeps middlewares and keeps it sorted by filter
+	MiddlewareComposer struct {
+		mws               []Middleware
+		routesUnderFilter []string
+		routes            map[string][]Middleware
+	}
+	middlewareComposerContextMetadataKey struct{}
+	// RequestContextMetadata context data from interception
+	RequestContextMetadata struct {
+		Meta       metadata.MD
+		FullMethod string
+	}
+)
 
 // NewMiddlewareComposer instance
 func NewMiddlewareComposer() *MiddlewareComposer {
@@ -33,6 +42,11 @@ func NewMiddlewareComposer() *MiddlewareComposer {
 		routesUnderFilter: make([]string, 0),
 		routes:            map[string][]Middleware{},
 	}
+}
+
+// ExtendContext baseCtx with new RequestContextMetadata
+func (mc *MiddlewareComposer) ExtendContext(baseCtx context.Context, newCtxMetadata RequestContextMetadata) context.Context {
+	return context.WithValue(baseCtx, middlewareComposerContextMetadataKey{}, newCtxMetadata)
 }
 
 // Register middleware with filter
@@ -90,4 +104,10 @@ func (mc *MiddlewareComposer) PassToNext(m ...Middleware) Middleware {
 
 		return requestHandler
 	}
+}
+
+// GetContextMetadata will try get form context.Context metadata about request from middleware during interception
+func GetContextMetadata(baseCtx context.Context) (meta RequestContextMetadata, isExist bool) {
+	meta, isExist = baseCtx.Value(middlewareComposerContextMetadataKey{}).(RequestContextMetadata)
+	return
 }

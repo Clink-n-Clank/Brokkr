@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/metadata"
 )
 
 var (
@@ -71,6 +72,24 @@ func TestCheckIfAppendedByPathMiddlewares(t *testing.T) {
 	affectedMiddlewares := mc.Search("/api.route/methods/FooBar")
 	assert.NotEmpty(t, affectedMiddlewares)
 	assert.Len(t, affectedMiddlewares, 3)
+}
+
+func TestContextMetadata(t *testing.T) {
+	const expectedFullMethod = "FooBar"
+	expectedMetaData := metadata.MD{"foo": {"bar"}}
+	ctx := context.Background()
+
+	mc := NewMiddlewareComposer()
+	extCtx := mc.ExtendContext(ctx, RequestContextMetadata{
+		Meta:       expectedMetaData,
+		FullMethod: expectedFullMethod,
+	})
+
+	mcCtxMeta, isMcCtxMetaExist := GetContextMetadata(extCtx)
+
+	assert.True(t, isMcCtxMetaExist)
+	assert.Equal(t, expectedFullMethod, mcCtxMeta.FullMethod)
+	assert.Equal(t, expectedMetaData, mcCtxMeta.Meta)
 }
 
 func testingFilteredMiddleware(handler RequestHandler) RequestHandler {
