@@ -70,6 +70,8 @@ func (a *ActorAPI) HandleHTTPRequest(method, endpointPath string, payload io.Rea
 		time.Sleep(a.StressConcurrentRequestsDelay)
 
 		go func() {
+			defer wg.Done()
+
 			var runtimeErr error
 			var req *http.Request
 			roundTrip := metrics.RoundTrip{}
@@ -101,7 +103,6 @@ func (a *ActorAPI) HandleHTTPRequest(method, endpointPath string, payload io.Rea
 			defer func() {
 				roundTrip.End = time.Now()
 				a.Metrics.Collect(*req, roundTrip, runtimeErr == nil)
-				wg.Done()
 			}()
 
 			roundTrip.Start = time.Now()
