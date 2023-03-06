@@ -58,7 +58,7 @@ func TestCronWorker_StartProcessStop(t *testing.T) {
 	)
 
 	if isTaskHandled {
-		t.Logf("Epected to be handled at least one job in worker %s", taskName)
+		t.Logf("Expected to be handled at least one job in worker %s", taskName)
 		t.FailNow()
 	}
 

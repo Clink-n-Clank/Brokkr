@@ -51,7 +51,7 @@ func Checkout[S State, O *Order](entity O) (S, O) {
 		return S(stateSkip), e
 	}
 
-	fmt.Printf("-- Checkout Reciept [ORDER: %s Amount: %d] ---\n", e.ID, e.SalePrice)
+	fmt.Printf("-- Checkout Receipt [ORDER: %s Amount: %d] ---\n", e.ID, e.SalePrice)
 
 	e.IsReceiptPrinted = true
 

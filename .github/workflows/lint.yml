@@ -19,4 +19,5 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_GO: true
           DEFAULT_BRANCH: main
+          FILTER_REGEX_EXCLUDE: .*vendor/.*
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

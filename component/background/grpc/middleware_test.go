@@ -53,7 +53,7 @@ func TestPassToNext(t *testing.T) {
 	assert.Nil(t, err)
 
 	if !reflect.DeepEqual(returned, "test") {
-		t.Errorf("requst handle must return: `%s` but returned: `%v`", "test", returned)
+		t.Errorf("request handle must return: `%s` but returned: `%v`", "test", returned)
 	}
 
 	if !reflect.DeepEqual(testingPassToMiddleware, 3) {
