@@ -63,7 +63,6 @@ func (a *ActorAPI) SetConcurrentRequestsAmount(reqAmount, reqDelayMilliseconds s
 
 	a.StressConcurrentRequests = uint32(ra)
 
-
 	rd, rdErr := strconv.Atoi(reqDelayMilliseconds)
 	if rdErr != nil {
 		return rdErr
@@ -87,12 +86,12 @@ func (a *ActorAPI) MetricsRequestDropIsLowerThan(p string) error {
 	}
 
 	pf, err := strconv.ParseFloat(p, 32)
-	if  err != nil {
+	if err != nil {
 		return err
 	}
 
 	if r > pf {
-		return fmt.Errorf("requests has more drops than expected (%f) but actuall drops are (%f)", pf, r)
+		return fmt.Errorf("requests has more drops than expected (%f) but actual drops are (%f)", pf, r)
 	}
 
 	return nil

@@ -4,3 +4,9 @@
 
 Brokkr micro framework that helps you quickly write simple API's and test it
 
+## Run tests
+
+```bash
+go test -v --race $(go list ./... | (grep -v /vendor/) | (grep -v internal/test/bdd/integration_tests)) -covermode=atomic -coverprofile=coverage.out
+```
+

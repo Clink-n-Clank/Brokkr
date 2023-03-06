@@ -1,8 +1,8 @@
 # github.com/cucumber/gherkin-go/v19 v19.0.3
 ## explicit; go 1.13
 github.com/cucumber/gherkin-go/v19
-# github.com/cucumber/godog v0.12.5
-## explicit; go 1.13
+# github.com/cucumber/godog v0.12.6
+## explicit; go 1.16
 github.com/cucumber/godog
 github.com/cucumber/godog/colors
 github.com/cucumber/godog/formatters
@@ -20,7 +20,7 @@ github.com/cucumber/messages-go/v16
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
-# github.com/gofrs/uuid v4.0.0+incompatible
+# github.com/gofrs/uuid v4.2.0+incompatible
 ## explicit
 github.com/gofrs/uuid
 # github.com/golang/protobuf v1.5.2
@@ -38,10 +38,10 @@ github.com/google/uuid
 github.com/grpc-ecosystem/go-grpc-middleware
 github.com/grpc-ecosystem/go-grpc-middleware/auth
 github.com/grpc-ecosystem/go-grpc-middleware/util/metautils
-# github.com/hashicorp/go-immutable-radix v1.3.0
+# github.com/hashicorp/go-immutable-radix v1.3.1
 ## explicit
 github.com/hashicorp/go-immutable-radix
-# github.com/hashicorp/go-memdb v1.3.0
+# github.com/hashicorp/go-memdb v1.3.2
 ## explicit; go 1.12
 github.com/hashicorp/go-memdb
 # github.com/hashicorp/golang-lru v0.5.4
@@ -171,6 +171,6 @@ google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
-# gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
+# gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
