@@ -1,6 +1,6 @@
 module github.com/Clink-n-Clank/Brokkr
 
-go 1.18
+go 1.20
 
 require (
 	github.com/cucumber/godog v0.12.6

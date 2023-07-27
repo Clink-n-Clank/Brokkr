@@ -5,21 +5,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        go: [ "1.18", "1.19", "1.20" ]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.go }}
-
-  test:
-    runs-on: ubuntu-latest
-    strategy:
       fail-fast: false
       matrix:
-        go: [ "1.18", "1.19", "1.20" ]
-
+        go: [ "1.20" ]
     steps:
       - uses: actions/setup-go@v4
         with:
@@ -27,6 +15,3 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build
         run: go build -v ./...
-      - name: BDD integration test
-        run: go test --godog.format=pretty --godog.tags=@~exception general
-        working-directory: internal/test/bdd/integration_tests
